@@ -1,6 +1,11 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+
+import 'package:go_delivery/home.dart';
+import 'package:go_delivery/start.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -10,6 +15,32 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    Timer(
+      Duration(seconds: 3),
+      () => checkUserAuthentication(),
+    );
+  }
+
+  Future<void> checkUserAuthentication() async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Start()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,23 +1,66 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_delivery/cart.dart';
 
 class Product extends StatefulWidget {
-  const Product({Key? key}) : super(key: key);
+  const Product({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _ProductState createState() => _ProductState();
 }
 
 class _ProductState extends State<Product> {
+  late String image;
+  late String name;
+  late String brand;
+  late String rate;
+  late String price;
+  late String des;
+
   @override
   Widget build(BuildContext context) {
+    final arguments =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final String image = arguments['image'].toString();
+    final String name = arguments['name'].toString();
+    final String brand = arguments['brand'].toString();
+    final String rate = arguments['rate'].toString();
+    final String price = arguments['price'].toString();
+    final String des = arguments['des'].toString();
+
+    void addToCart() {
+      final user = FirebaseAuth.instance.currentUser;
+      final userId = user?.uid;
+
+      final cartRef = FirebaseFirestore.instance.collection('cart').doc();
+
+      final cartData = {
+        'userId': userId, // Add the user ID to the cart data
+        'image': image,
+        'name': name,
+        'brand': brand,
+        'rate': rate,
+        'price': int.parse(price),
+        'des': des,
+        'time': DateTime.now(),
+      };
+
+      cartRef
+          .set(cartData)
+          .then((value) => print('Item added to cart'))
+          .catchError((error) => print('Failed to add item to cart: $error'));
+    }
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(255, 245, 245, 1),
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(255, 94, 94, 1),
         title: Center(
           child: Text(
-            'Iphone',
+            name,
             style: TextStyle(
               color: Colors.white,
             ),
@@ -35,7 +78,7 @@ class _ProductState extends State<Product> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10.0),
                     child: Image.network(
-                      "https://m.media-amazon.com/images/I/31VjlrbE3bL._SY445_SX342_QL70_FMwebp_.jpg",
+                      image,
                       width: double.maxFinite,
                       height: 250,
                       fit: BoxFit.fitHeight,
@@ -54,7 +97,7 @@ class _ProductState extends State<Product> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Rs: 100000',
+                      "₹${price}",
                       style:
                           TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
                     ),
@@ -64,7 +107,7 @@ class _ProductState extends State<Product> {
                             height: 25,
                             width: 25,
                             child: Image.asset('lib/image/star.png')),
-                        Text('3.0'),
+                        Text(rate),
                         SizedBox(
                           width: 30,
                         )
@@ -79,16 +122,16 @@ class _ProductState extends State<Product> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Iphone',
+                      name,
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: [
-                        Icon(
-                          Icons.favorite_border_rounded,
-                          color: Color.fromRGBO(255, 94, 94, 1),
-                        ),
+                        // Icon(
+                        //   Icons.favorite_border_rounded,
+                        //   color: Color.fromRGBO(255, 94, 94, 1),
+                        // ),
                         Padding(
                           padding: const EdgeInsets.only(left: 10, right: 30),
                           child: Icon(
@@ -104,7 +147,7 @@ class _ProductState extends State<Product> {
                   height: 5,
                 ),
                 Text(
-                  'Apple',
+                  brand,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -135,7 +178,7 @@ class _ProductState extends State<Product> {
           Padding(
             padding: const EdgeInsets.only(left: 40, right: 30, top: 10),
             child: Text(
-              'iPhone 13 boasts an advanced dual-camera system that allows you to click mesmerizing pictures with immaculate clarity. Furthermore, the lightning-fast A15 Bionic chip allows for seamless multitasking, elevating your performance to a new dimension. A big leap in battery life, a durable design, and a bright Super Retina XDR display facilitate boosting your user experience.',
+              des,
             ),
           ),
         ],
@@ -146,6 +189,7 @@ class _ProductState extends State<Product> {
           children: [
             InkWell(
               onTap: () {
+                addToCart();
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -153,14 +197,14 @@ class _ProductState extends State<Product> {
                     ));
               },
               child: Container(
-                color: Color.fromRGBO(252, 252, 252, 1),
-                width: MediaQuery.of(context).size.width / 2,
+                color: Color.fromRGBO(255, 94, 94, 1),
+                width: MediaQuery.of(context).size.width / 1,
                 height: 50.0,
                 child:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Icon(
                     Icons.shopping_cart_rounded,
-                    color: Color.fromRGBO(255, 94, 94, 1),
+                    color: Color.fromRGBO(252, 252, 252, 1),
                   ),
                   SizedBox(
                     width: 10,
@@ -169,28 +213,37 @@ class _ProductState extends State<Product> {
                     'Cart',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(255, 94, 94, 1),
+                      color: Color.fromRGBO(252, 252, 252, 1),
                     ),
                   )
                 ]),
               ),
             ),
-            Container(
-              color: Color.fromRGBO(255, 94, 94, 1),
-              width: MediaQuery.of(context).size.width / 2,
-              height: 50.0,
-              child:
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(Icons.shopping_bag_rounded, color: Colors.white),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  'Buy',
-                  style: TextStyle(color: Colors.white),
-                )
-              ]),
-            ),
+            // InkWell(
+            //   onTap: () {
+            //     Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) => Buy(),
+            //         ));
+            //   },
+            //   child: Container(
+            //     color: Color.fromRGBO(255, 94, 94, 1),
+            //     width: MediaQuery.of(context).size.width / 2,
+            //     height: 50.0,
+            //     child:
+            //         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            //       Icon(Icons.shopping_bag_rounded, color: Colors.white),
+            //       SizedBox(
+            //         width: 10,
+            //       ),
+            //       Text(
+            //         'Buy',
+            //         style: TextStyle(color: Colors.white),
+            //       )
+            //     ]),
+            //   ),
+            // ),
           ],
         ),
       ),

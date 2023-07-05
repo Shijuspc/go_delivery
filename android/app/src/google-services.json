@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "121890272297",
+    "project_id": "go-delivery-ebab0",
+    "storage_bucket": "go-delivery-ebab0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121890272297:android:4ef4ae4e7a565b7bc2d838",
+        "android_client_info": {
+          "package_name": "com.example.go_delivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121890272297-pfqmpkfd0nh33ucr242bf5plrcbkt791.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBL1D6fmqKt5D711FmYiLqWQNuv7RYHNmA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121890272297-pfqmpkfd0nh33ucr242bf5plrcbkt791.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

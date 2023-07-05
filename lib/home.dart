@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:go_delivery/cart.dart';
+import 'package:go_delivery/login.dart';
+import 'package:go_delivery/order.dart';
 import 'package:go_delivery/product.dart';
 import 'package:go_delivery/profile.dart';
 
@@ -12,6 +16,19 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  void logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login(),
+          ));
+    } catch (e) {
+      print('Logout failed: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +45,13 @@ class _HomeState extends State<Home> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Cart(),
+                  ));
+            },
             icon: Icon(
               Icons.shopping_cart,
               color: Colors.white,
@@ -44,34 +67,55 @@ class _HomeState extends State<Home> {
               decoration: BoxDecoration(
                 color: Color.fromRGBO(255, 94, 94, 1),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 80,
-                    width: 80,
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://i.pinimg.com/474x/4c/3e/3b/4c3e3b91f05a5765aa544ac7557d6642.jpg'),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'abc@gmail.com',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Text('Loading...');
+                  }
+                  final userData =
+                      snapshot.data!.data() as Map<String, dynamic>;
+                  final email = userData['email'];
+                  final name = userData['name'];
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            'https://i.pinimg.com/474x/4c/3e/3b/4c3e3b91f05a5765aa544ac7557d6642.jpg',
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        name,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        email,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             ListTile(
@@ -88,21 +132,28 @@ class _HomeState extends State<Home> {
                 ));
               },
             ),
-            ListTile(
-              leading: Icon(
-                Icons.favorite,
-                color: Color.fromRGBO(255, 94, 94, 1),
-              ),
-              title: Text('Favorites'),
-              onTap: () {},
-            ),
+            // ListTile(
+            //   leading: Icon(
+            //     Icons.favorite,
+            //     color: Color.fromRGBO(255, 94, 94, 1),
+            //   ),
+            //   title: Text('Favorites'),
+            //   onTap: () {},
+            // ),
             ListTile(
               leading: Icon(
                 Icons.shopping_basket,
                 color: Color.fromRGBO(255, 94, 94, 1),
               ),
               title: Text('Orders'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => order(),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: Icon(
@@ -110,7 +161,13 @@ class _HomeState extends State<Home> {
                 color: Color.fromRGBO(255, 94, 94, 1),
               ),
               title: Text('Cart'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Cart(),
+                    ));
+              },
             ),
             ListTile(
               leading: Icon(
@@ -118,139 +175,167 @@ class _HomeState extends State<Home> {
                 color: Color.fromRGBO(255, 94, 94, 1),
               ),
               title: Text('Logout'),
-              onTap: () {},
+              onTap: () {
+                logout();
+              },
             ),
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.all(5),
-              shrinkWrap: true,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.80,
-              ),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Product(),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        color: Color.fromRGBO(255, 94, 94, 1),
-                      ),
-                      borderRadius: BorderRadius.circular(10.0),
+      body: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('Product').snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Text('Loading...');
+            }
+
+            final products = snapshot.data!.docs;
+
+            return Column(
+              children: [
+                Expanded(
+                  child: GridView.builder(
+                    padding: EdgeInsets.all(5),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.80,
                     ),
-                    elevation: 3.0,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(1.0),
-                          child: Container(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                "https://m.media-amazon.com/images/I/31VjlrbE3bL._SY445_SX342_QL70_FMwebp_.jpg",
-                                width: 150,
-                                height: 150,
-                                fit: BoxFit.cover,
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      final String image = product['image'];
+                      final String name = product['name'];
+                      final String brand = product['brand'];
+                      final String rate = product['rate'];
+                      final String price = product['price'];
+                      final String des = product['des'];
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Product(),
+                              settings: RouteSettings(
+                                arguments: {
+                                  'image': image,
+                                  'name': name,
+                                  'brand': brand,
+                                  'rate': rate,
+                                  'price': price,
+                                  'des': des,
+                                },
                               ),
                             ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Color.fromRGBO(255, 94, 94, 1),
+                            ),
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20, right: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          elevation: 3.0,
+                          child: Column(
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Iphone",
-                                    style: TextStyle(
-                                      color: Color.fromRGBO(255, 94, 94, 1),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
+                              Padding(
+                                padding: const EdgeInsets.all(1.0),
+                                child: Container(
+                                  margin: EdgeInsets.all(10),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Image.network(
+                                      image,
+                                      width: 150,
+                                      height: 150,
+                                      fit: BoxFit.contain,
                                     ),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    "Apple",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 116, 115, 115),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Icon(
-                                Icons.favorite_border_rounded,
-                                color: Color.fromRGBO(255, 94, 94, 1),
-                              )
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15, right: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 25,
-                                  width: 25,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Image.asset('lib/image/star.png'),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        '4.0',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
-                              Text(
-                                'Rs: 10000',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 10, right: 15),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      name,
+                                      style: TextStyle(
+                                        color: Color.fromRGBO(255, 94, 94, 1),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        ClipRRect(
+                                            child: Image.asset(
+                                          'lib/image/star.png',
+                                          height: 25,
+                                          width: 25,
+                                        )),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          rate,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20, right: 15),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      brand,
+                                      style: TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 116, 115, 115),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    Text(
+                                      '₹${price}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                ),
+              ],
+            );
+          }),
     );
   }
 }

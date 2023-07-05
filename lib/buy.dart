@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+
 import 'package:go_delivery/order.dart';
+import 'package:go_delivery/profile.dart';
 
 class Buy extends StatefulWidget {
-  const Buy({super.key});
+  const Buy({Key? key});
 
   @override
   State<Buy> createState() => _BuyState();
@@ -12,7 +15,61 @@ class Buy extends StatefulWidget {
 
 class _BuyState extends State<Buy> {
   String? selectedValue = '1';
-  int selectedradio = 0;
+  String selectedPayment = '';
+  String address = '';
+  String image = '';
+  String name = '';
+  int price = 0;
+  String rate = '';
+  int qty = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAddress();
+    fetchCartItems();
+  }
+
+  void fetchAddress() {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get()
+          .then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot.exists) {
+          Map<String, dynamic> userData =
+              documentSnapshot.data() as Map<String, dynamic>;
+          setState(() {
+            address = userData['address'];
+          });
+        }
+      });
+    }
+  }
+
+  void fetchCartItems() {
+    FirebaseFirestore.instance
+        .collection('cart')
+        .get()
+        .then((QuerySnapshot snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final DocumentSnapshot documentSnapshot = snapshot.docs.first;
+        final Map<String, dynamic> data =
+            documentSnapshot.data() as Map<String, dynamic>;
+        setState(() {
+          name = data['name'] as String;
+          image = data['image'] as String;
+          price = data['price'] as int;
+          rate = data['rate'] as String;
+          qty = data['qty'] as int;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,334 +86,315 @@ class _BuyState extends State<Buy> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              width: double.maxFinite,
-              height: 120,
-              child: Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 15, top: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Address',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      Padding(
+        child: Column(
+          children: [
+            StreamBuilder(
+              stream:
+                  FirebaseFirestore.instance.collection('Product').snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text('Loading...');
+                }
+
+                final products = snapshot.data!.docs;
+
+                return Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: double.maxFinite,
+                    height: 120,
+                    child: Card(
+                      elevation: 2,
+                      child: Padding(
                         padding:
-                            const EdgeInsets.only(top: 10, left: 10, right: 10),
-                        child: Text(
-                            'Postmaster, Palakkad City S.O, Palakkad, Kerala, India (IN), Pin Code:-678014.',
-                            style: TextStyle(fontSize: 14)),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Icon(Icons.edit),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 10,
-              right: 10,
-            ),
-            child: Card(
-              elevation: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.network(
-                          "https://rukminim1.flixcart.com/image/832/832/ktketu80/mobile/8/z/w/iphone-13-mlph3hn-a-apple-original-imag6vzzhrxgazsg.jpeg",
-                          height: 120,
-                          width: 100,
-                          fit: BoxFit.scaleDown,
-                        ),
-                        Container(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(height: 5),
-                              Text(
-                                "Iphone",
-                                style: TextStyle(
-                                  color: Color.fromRGBO(255, 94, 94, 1),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            const EdgeInsets.only(left: 10, right: 15, top: 15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Address',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Container(height: 10),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Rs: 200",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 10,
+                                left: 10,
+                                right: 10,
+                              ),
+                              child: Text(
+                                address,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Profile(),
                                     ),
-                                  ),
-                                  Container(width: 30),
-                                  Row(
+                                  );
+                                },
+                                child: Icon(Icons.edit),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            StreamBuilder(
+              stream: FirebaseFirestore.instance.collection('cart').snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text('Loading...');
+                }
+
+                final products = snapshot.data!.docs;
+
+                return Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  child: Card(
+                    elevation: 2,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Image.network(
+                                  image,
+                                  height: 120,
+                                  width: 100,
+                                  fit: BoxFit.scaleDown,
+                                ),
+                                Container(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(
-                                        height: 25,
-                                        width: 25,
-                                        child:
-                                            Image.asset('lib/image/star.png'),
+                                      Container(height: 5),
+                                      Text(
+                                        name,
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(255, 94, 94, 1),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                      Text('3.0'),
+                                      Container(height: 10),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Price: \₹${price}',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          Container(width: 30),
+                                          Row(
+                                            children: [
+                                              SizedBox(
+                                                height: 25,
+                                                width: 25,
+                                                child: Image.asset(
+                                                    'lib/image/star.png'),
+                                              ),
+                                              Text(rate),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            "Qty",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          Container(width: 10),
+                                          DropdownButton<int>(
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black,
+                                            ),
+                                            value: qty,
+                                            items: [1, 2, 3, 4, 5, 6]
+                                                .map((int item) {
+                                              return DropdownMenuItem<int>(
+                                                child: Text(item.toString()),
+                                                value: item,
+                                              );
+                                            }).toList(),
+                                            onChanged: (int? value) {
+                                              setState(() {
+                                                qty = value!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Qty",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  Container(width: 10),
-                                  DropdownButton<String>(
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.black),
-                                    value: selectedValue,
-                                    items: ['1', '2', '3', '4', '5', '6'].map(
-                                      (String item) {
-                                        return DropdownMenuItem<String>(
-                                          child: Text(item),
-                                          value: item,
-                                        );
-                                      },
-                                    ).toList(),
-                                    onChanged: (String? value) {
-                                      setState(() {
-                                        selectedValue = value;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
+                        ]),
+                  ),
+                );
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: SizedBox(
+                width: double.maxFinite,
+                height: 270,
+                child: Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 15, right: 15, top: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Select Payment Option',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        RadioListTile(
+                          title: Text('UPI'),
+                          value: 'UPI',
+                          groupValue: selectedPayment,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPayment = value.toString();
+                            });
+                          },
+                        ),
+                        RadioListTile(
+                          title: Text('Debit Card'),
+                          value: 'Debit Card',
+                          groupValue: selectedPayment,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPayment = value.toString();
+                            });
+                          },
+                        ),
+                        RadioListTile(
+                          title: Text('Credit Card'),
+                          value: 'Credit Card',
+                          groupValue: selectedPayment,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPayment = value.toString();
+                            });
+                          },
+                        ),
+                        RadioListTile(
+                          title: Text('Cash on Delivery'),
+                          value: 'Cash on Delivery',
+                          groupValue: selectedPayment,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPayment = value.toString();
+                            });
+                          },
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              width: double.maxFinite,
-              height: 270,
-              child: Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Select Payment Option',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      RadioListTile(
-                        title: Text('UPI'),
-                        value: 1,
-                        groupValue: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedradio = 1;
-                          });
-                        },
-                      ),
-                      RadioListTile(
-                        title: Text('Debit Card'),
-                        value: 2,
-                        groupValue: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedradio = 2;
-                          });
-                        },
-                      ),
-                      RadioListTile(
-                        title: Text('Credit Card'),
-                        value: 3,
-                        groupValue: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedradio = 3;
-                          });
-                        },
-                      ),
-                      RadioListTile(
-                        title: Text('Cash on Delivery'),
-                        value: 3,
-                        groupValue: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedradio = 3;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.only(top: 0, bottom: 10, left: 10, right: 10),
-            child: Card(
-              elevation: 2,
-              color: Color.fromRGBO(255, 255, 255, 1),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 30, right: 30, top: 30, bottom: 30),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Item Price :',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            'Rs 200',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Discount :',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            'Rs -40',
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Shipping Charge :',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            'Rs 40',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total Amount :',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Rs 400',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      )
-                    ]),
-              ),
-            ),
-          ),
-        ]),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 3,
-        child: Row(
-          children: [
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Order(),
-                    ));
-              },
-              child: Container(
-                color: Color.fromRGBO(255, 94, 94, 1),
-                width: MediaQuery.of(context).size.width / 1,
-                height: 50.0,
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(Icons.shopping_bag_rounded, color: Colors.white),
-                  SizedBox(
-                    width: 10,
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: SizedBox(
+                width: double.maxFinite,
+                height: 50,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                      Color.fromRGBO(255, 94, 94, 1),
+                    ),
                   ),
-                  Text(
-                    'Order Now',
+                  onPressed: () {
+                    addOrderCollection();
+                    deleteCartCollection();
+                  },
+                  child: Text(
+                    'Place Order',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  )
-                ]),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void addOrderCollection() {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      FirebaseFirestore.instance.collection('orders').add({
+        'userId': user.uid,
+        'address': address,
+        'image': image,
+        'name': name,
+        'price': price,
+        'payment': selectedPayment,
+        'date': Timestamp.now(),
+      }).then((value) {
+        print('Order placed successfully!');
+      }).catchError((error) {
+        print('Failed to place order: $error');
+      });
+    }
+  }
+
+  void deleteCartCollection() {
+    FirebaseFirestore.instance.collection('cart').get().then((snapshot) {
+      for (DocumentSnapshot ds in snapshot.docs) {
+        ds.reference.delete();
+      }
+      print('Cart collection deleted successfully!');
+    }).catchError((error) {
+      print('Failed to delete cart collection: $error');
+    });
   }
 }
