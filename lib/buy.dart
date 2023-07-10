@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-
 import 'package:go_delivery/order.dart';
 import 'package:go_delivery/profile.dart';
 
@@ -101,8 +100,6 @@ class _BuyState extends State<Buy> {
                   return Text('Loading...');
                 }
 
-                final products = snapshot.data!.docs;
-
                 return Padding(
                   padding: const EdgeInsets.all(10),
                   child: SizedBox(
@@ -167,8 +164,6 @@ class _BuyState extends State<Buy> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Text('Loading...');
                 }
-
-                final products = snapshot.data!.docs;
 
                 return Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
@@ -349,6 +344,11 @@ class _BuyState extends State<Buy> {
                   onPressed: () {
                     addOrderCollection();
                     deleteCartCollection();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => order(),
+                        ));
                   },
                   child: Text(
                     'Place Order',

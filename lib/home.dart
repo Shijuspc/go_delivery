@@ -252,12 +252,15 @@ class _HomeState extends State<Home> {
                                     borderRadius: BorderRadius.circular(10.0),
                                     child: Image.network(
                                       image,
-                                      width: 150,
-                                      height: 150,
+                                      width: 155,
+                                      height: 155,
                                       fit: BoxFit.contain,
                                     ),
                                   ),
                                 ),
+                              ),
+                              SizedBox(
+                                height: 3,
                               ),
                               Padding(
                                 padding:
