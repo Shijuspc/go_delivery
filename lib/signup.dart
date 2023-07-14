@@ -100,7 +100,7 @@ class _SignupState extends State<Signup> {
                           color: Color.fromRGBO(255, 94, 94, 1),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
                           width: 2,
@@ -143,13 +143,6 @@ class _SignupState extends State<Signup> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
-                          width: 3,
-                          color: Color.fromRGBO(255, 94, 94, 1),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
                           width: 2,
                           color: Color.fromRGBO(255, 94, 94, 1),
                         ),
@@ -187,7 +180,7 @@ class _SignupState extends State<Signup> {
                           color: Color.fromRGBO(255, 94, 94, 1),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
                           width: 2,
@@ -228,7 +221,7 @@ class _SignupState extends State<Signup> {
                           color: Color.fromRGBO(255, 94, 94, 1),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
                           width: 2,

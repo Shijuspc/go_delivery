@@ -16,17 +16,42 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  TextEditingController _searchController = TextEditingController();
+  bool _isTextFieldVisible = false;
+  List<QueryDocumentSnapshot> filteredProducts = [];
+  String searchQuery = '';
+
+  void _toggleTextFieldVisibility() {
+    setState(() {
+      _isTextFieldVisible = !_isTextFieldVisible;
+    });
+  }
+
   void logout() async {
     try {
       await FirebaseAuth.instance.signOut();
       Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Login(),
-          ));
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login(),
+        ),
+      );
     } catch (e) {
       print('Logout failed: $e');
     }
+  }
+
+  void _performSearch() {
+    setState(() {
+      searchQuery = _searchController.text;
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _searchController.clear();
+      searchQuery = '';
+    });
   }
 
   @override
@@ -46,17 +71,32 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             onPressed: () {
+              setState(() {
+                _isTextFieldVisible = !_isTextFieldVisible;
+                if (!_isTextFieldVisible) {
+                  _clearSearch();
+                }
+              });
+            },
+            icon: Icon(
+              _isTextFieldVisible ? Icons.close : Icons.search,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Cart(),
-                  ));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Cart(),
+                ),
+              );
             },
             icon: Icon(
               Icons.shopping_cart,
               color: Colors.white,
             ),
-          )
+          ),
         ],
       ),
       drawer: Drawer(
@@ -132,14 +172,6 @@ class _HomeState extends State<Home> {
                 ));
               },
             ),
-            // ListTile(
-            //   leading: Icon(
-            //     Icons.favorite,
-            //     color: Color.fromRGBO(255, 94, 94, 1),
-            //   ),
-            //   title: Text('Favorites'),
-            //   onTap: () {},
-            // ),
             ListTile(
               leading: Icon(
                 Icons.shopping_basket,
@@ -163,10 +195,11 @@ class _HomeState extends State<Home> {
               title: Text('Cart'),
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Cart(),
-                    ));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Cart(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -183,57 +216,102 @@ class _HomeState extends State<Home> {
         ),
       ),
       body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('Product').snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
+        stream: FirebaseFirestore.instance.collection('Product').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
 
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Text('Loading...');
-            }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text('Loading...');
+          }
 
-            final products = snapshot.data!.docs;
+          if (searchQuery.isEmpty) {
+            filteredProducts = snapshot.data!.docs;
+          } else {
+            filteredProducts = snapshot.data!.docs
+                .where((product) => product['name']
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()))
+                .toList();
+          }
 
-            return Column(
-              children: [
-                Expanded(
-                  child: GridView.builder(
-                    padding: EdgeInsets.all(5),
-                    shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.80,
+          return Column(
+            children: [
+              if (_isTextFieldVisible)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(left: 30),
+                      filled: true,
+                      fillColor: Colors.white,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: Color.fromRGBO(255, 94, 94, 1),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: Color.fromRGBO(255, 94, 94, 1),
+                        ),
+                      ),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: IconButton(
+                            onPressed: _performSearch,
+                            icon: Icon(Icons.search_rounded)),
+                      ),
+                      hintText: 'Search',
                     ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      final String image = product['image'];
-                      final String name = product['name'];
-                      final String brand = product['brand'];
-                      final String rate = product['rate'];
-                      final String price = product['price'];
-                      final String des = product['des'];
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Product(),
-                              settings: RouteSettings(
-                                arguments: {
-                                  'image': image,
-                                  'name': name,
-                                  'brand': brand,
-                                  'rate': rate,
-                                  'price': price,
-                                  'des': des,
-                                },
-                              ),
+                  ),
+                ),
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.all(5),
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.80,
+                  ),
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = filteredProducts[index];
+                    final String image = product['image'];
+                    final String name = product['name'];
+                    final String brand = product['brand'];
+                    final String rate = product['rate'];
+                    final String price = product['price'];
+                    final String des = product['des'];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Product(),
+                            settings: RouteSettings(
+                              arguments: {
+                                'image': image,
+                                'name': name,
+                                'brand': brand,
+                                'rate': rate,
+                                'price': price,
+                                'des': des,
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: double.minPositive,
+                          top: double.minPositive,
+                        ),
                         child: Card(
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
@@ -242,103 +320,111 @@ class _HomeState extends State<Home> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           elevation: 3.0,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Container(
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 0.4,
+                            child: ListView(
+                              physics: NeverScrollableScrollPhysics(),
+                              children: [
+                                Container(
                                   margin: EdgeInsets.all(10),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10.0),
                                     child: Image.network(
                                       image,
-                                      width: 155,
-                                      height: 155,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.4,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.4,
                                       fit: BoxFit.contain,
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 10, right: 15),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      name,
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(255, 94, 94, 1),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 15),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(255, 94, 94, 1),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        ClipRRect(
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          ClipRRect(
                                             child: Image.asset(
-                                          'lib/image/star.png',
-                                          height: 25,
-                                          width: 25,
-                                        )),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Text(
-                                          rate,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold,
+                                              'lib/image/star.png',
+                                              height: 25,
+                                              width: 25,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 20, right: 15),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      brand,
-                                      style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 116, 115, 115),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                          Text(
+                                            rate,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    Text(
-                                      '₹${price}',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, right: 15, bottom: 10),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        brand,
+                                        style: TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 116, 115, 115),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      Text(
+                                        '₹$price',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            );
-          }),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

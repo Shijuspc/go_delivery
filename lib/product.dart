@@ -67,121 +67,123 @@ class _ProductState extends State<Product> {
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Card(
-              child: Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
-                    child: Image.network(
-                      image,
-                      width: double.maxFinite,
-                      height: 250,
-                      fit: BoxFit.fitHeight,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Card(
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Image.network(
+                        image,
+                        width: double.maxFinite,
+                        height: 250,
+                        fit: BoxFit.contain,
+                      ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "₹${price}",
+                        style: TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.w500),
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: Image.asset('lib/image/star.png')),
+                          Text(rate),
+                          SizedBox(
+                            width: 30,
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: [
+                          // Icon(
+                          //   Icons.favorite_border_rounded,
+                          //   color: Color.fromRGBO(255, 94, 94, 1),
+                          // ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 30),
+                            child: Icon(
+                              Icons.share,
+                              color: Color.fromRGBO(255, 94, 94, 1),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    brand,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color.fromARGB(255, 116, 115, 115),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
                   ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "₹${price}",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                            height: 25,
-                            width: 25,
-                            child: Image.asset('lib/image/star.png')),
-                        Text(rate),
-                        SizedBox(
-                          width: 30,
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      name,
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        // Icon(
-                        //   Icons.favorite_border_rounded,
-                        //   color: Color.fromRGBO(255, 94, 94, 1),
-                        // ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 30),
-                          child: Icon(
-                            Icons.share,
-                            color: Color.fromRGBO(255, 94, 94, 1),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Text(
-                  brand,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 116, 115, 115),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-              ],
+            Divider(
+              color: Color.fromARGB(255, 253, 253, 253),
+              thickness: 5,
             ),
-          ),
-          Divider(
-            color: Color.fromARGB(255, 253, 253, 253),
-            thickness: 5,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30),
-            child: Text(
-              'Description',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 80, 80, 80),
+            Padding(
+              padding: const EdgeInsets.only(left: 30),
+              child: Text(
+                'Description',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 80, 80, 80),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 40, right: 30, top: 10),
-            child: Text(
-              des,
+            Padding(
+              padding: const EdgeInsets.only(left: 40, right: 30, top: 10),
+              child: Text(
+                des,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 3,

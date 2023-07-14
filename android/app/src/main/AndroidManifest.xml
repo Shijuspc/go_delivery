@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.go_delivery">
+     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
    <application
         android:label="go_delivery"
         android:name="${applicationName}"
