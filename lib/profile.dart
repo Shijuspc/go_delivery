@@ -1,3 +1,6 @@
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,12 +18,25 @@ class _ProfileState extends State<Profile> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _phoneNumberController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
+  XFile? pickfile;
+  File? pickimage;
+  String? profileImageUrl;
 
   @override
   void initState() {
     super.initState();
     // Fetch the current user's data and populate the text controllers
     _fetchUserProfile();
+  }
+
+  Future<File?> _selectImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      return File(pickedFile.path);
+    }
+    return null;
   }
 
   Future<void> _fetchUserProfile() async {
@@ -38,6 +54,20 @@ class _ProfileState extends State<Profile> {
           _emailController.text = data['email'];
           _phoneNumberController.text = data['phoneNumber'];
           _addressController.text = data['address'];
+          profileImageUrl = data['profileImageUrl'];
+
+          if (profileImageUrl != null && pickimage != null) {
+            try {
+              final imageFile = await firebase_storage.FirebaseStorage.instance
+                  .refFromURL(profileImageUrl!)
+                  .writeToFile(pickimage!);
+              setState(() {
+                pickimage = imageFile as File?;
+              });
+            } catch (e) {
+              print('Error retrieving profile image: $e');
+            }
+          }
         }
       }
     } catch (e) {
@@ -65,7 +95,27 @@ class _ProfileState extends State<Profile> {
             'phoneNumber': _phoneNumberController.text,
             'address': _addressController.text,
           });
+          // Upload image to Firebase Storage if an image is selected
+          if (pickimage != null) {
+            try {
+              final user = FirebaseAuth.instance.currentUser;
+              final storageRef = firebase_storage.FirebaseStorage.instance
+                  .ref()
+                  .child('profile_images')
+                  .child(user!.uid);
 
+              await storageRef.putFile(pickimage!);
+              final imageUrl = await storageRef.getDownloadURL();
+
+              // Save the image URL to Firestore or use it as needed
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .update({'profileImageUrl': imageUrl});
+            } catch (e) {
+              print('Error uploading image: $e');
+            }
+          }
           // Show success message or navigate to a different screen
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Profile updated successfully')),
@@ -109,9 +159,26 @@ class _ProfileState extends State<Profile> {
                 SizedBox(
                   height: 80,
                   width: 80,
-                  child: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        'https://i.pinimg.com/474x/4c/3e/3b/4c3e3b91f05a5765aa544ac7557d6642.jpg'),
+                  child: InkWell(
+                    onTap: () async {
+                      ImagePicker picker = ImagePicker();
+                      pickfile =
+                          await picker.pickImage(source: ImageSource.gallery);
+                      setState(() {
+                        pickimage = File(pickfile!.path);
+                      });
+                    },
+                    child: SizedBox(
+                      height: 80,
+                      width: 80,
+                      child: ClipOval(
+                        child: CircleAvatar(
+                          backgroundImage:
+                              pickimage != null ? FileImage(pickimage!) : null,
+                          radius: 40,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -135,7 +202,7 @@ class _ProfileState extends State<Profile> {
                         color: Color.fromRGBO(255, 94, 94, 1),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
                         width: 2,
@@ -171,7 +238,7 @@ class _ProfileState extends State<Profile> {
                         color: Color.fromRGBO(255, 94, 94, 1),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
                         width: 2,
@@ -207,7 +274,7 @@ class _ProfileState extends State<Profile> {
                         color: Color.fromRGBO(255, 94, 94, 1),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
                         width: 2,
@@ -248,7 +315,7 @@ class _ProfileState extends State<Profile> {
                           color: Color.fromRGBO(255, 94, 94, 1),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
                           width: 2,
