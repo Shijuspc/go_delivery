@@ -93,15 +93,16 @@ class _Start1State extends State<Start1> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             SizedBox(
-                              width: 50,
+                              width: 60,height: 50,
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                        fixedSize: Size.fromHeight(50),
+
+
                                         elevation: 0,
                                         backgroundColor:
-                                            Color.fromRGBO(255, 94, 94, 1),
+                                            const Color.fromRGBO(255, 94, 94, 1),
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(15))),
@@ -112,9 +113,9 @@ class _Start1State extends State<Start1> {
                                             builder: (context) => Start2(),
                                           ));
                                     },
-                                    child: Center(
-                                        child: Icon(Icons.arrow_forward))),
-                              ),
+                                    child:
+                                        Center(child:  Icon(Icons.arrow_forward,color: Colors.white,)))),
+
                             ),
                           ],
                         ),

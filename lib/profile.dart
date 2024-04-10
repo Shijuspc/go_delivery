@@ -346,7 +346,7 @@ class _ProfileState extends State<Profile> {
                     onPressed: _updateProfile,
                     child: Text(
                       'Update Profile',
-                      style: TextStyle(
+                      style: TextStyle(color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 17,
                       ),

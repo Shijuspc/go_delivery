@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_delivery/cart.dart';
 import 'package:go_delivery/login.dart';
 import 'package:go_delivery/order.dart';
@@ -59,6 +60,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(255, 245, 245, 1),
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Color.fromRGBO(255, 94, 94, 1),
         title: Center(
           child: Text(
@@ -103,59 +105,62 @@ class _HomeState extends State<Home> {
         child: ListView(
           padding: const EdgeInsets.all(0),
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(255, 94, 94, 1),
-              ),
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(FirebaseAuth.instance.currentUser!.uid)
-                    .snapshots(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<DocumentSnapshot> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text('Loading...');
-                  }
-                  final userData =
-                      snapshot.data!.data() as Map<String, dynamic>;
-                  final email = userData['email'];
-                  final name = userData['name'];
+            SizedBox(height: 250,
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(255, 94, 94, 1),
+                ),
+                child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<DocumentSnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Text('Loading...');
+                    }
+                    final userData =
+                        snapshot.data!.data() as Map<String, dynamic>;
+                    final email = userData['email'];
+                    final name = userData['name'];
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 80,
-                        width: 80,
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            'https://i.pinimg.com/474x/4c/3e/3b/4c3e3b91f05a5765aa544ac7557d6642.jpg',
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        SizedBox(
+                          height: 80,
+                          width: 80,
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              'https://i.pinimg.com/474x/4c/3e/3b/4c3e3b91f05a5765aa544ac7557d6642.jpg',
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        name,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        SizedBox(height: 10),
+                        Text(
+                          name,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        email,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                        Text(
+                          email,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
             ListTile(
@@ -312,7 +317,7 @@ class _HomeState extends State<Home> {
                           bottom: double.minPositive,
                           top: double.minPositive,
                         ),
-                        child: Card(
+                        child: Card(color: Colors.white,
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
                               color: Color.fromRGBO(255, 94, 94, 1),
@@ -340,48 +345,46 @@ class _HomeState extends State<Home> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
-                                  height: 3,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 15),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        name,
-                                        style: TextStyle(
-                                          color: Color.fromRGBO(255, 94, 94, 1),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+
+                                SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 15),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            color: Color.fromRGBO(255, 94, 94, 1),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          ClipRRect(
-                                            child: Image.asset(
-                                              'lib/image/star.png',
-                                              height: 25,
-                                              width: 25,
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            ClipRRect(
+                                              child: Image.asset(
+                                                'lib/image/star.png',
+                                                height: 20,
+                                                width: 20,
+                                              ),
                                             ),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                            rate,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.bold,
+                                  
+                                            Text(
+                                              rate,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 SizedBox(

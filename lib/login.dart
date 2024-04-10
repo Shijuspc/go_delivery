@@ -153,7 +153,7 @@ class _LoginState extends State<Login> {
                     onPressed: _login,
                     child: Text(
                       'Login',
-                      style: TextStyle(
+                      style: TextStyle(color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 17,
                       ),

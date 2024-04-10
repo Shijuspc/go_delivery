@@ -17,6 +17,7 @@ class _Start2State extends State<Start2> {
           child: Column(
         children: [
           SizedBox(
+
             height: 50,
           ),
           Align(
@@ -102,7 +103,8 @@ class _Start2State extends State<Start2> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             SizedBox(
-                              width: 50,
+                              height: 50,
+                              width: 60,
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: ElevatedButton(
@@ -122,7 +124,7 @@ class _Start2State extends State<Start2> {
                                           ));
                                     },
                                     child: Center(
-                                        child: Icon(Icons.arrow_forward))),
+                                        child: Icon(Icons.arrow_forward,color: Colors.white,))),
                               ),
                             ),
                           ],

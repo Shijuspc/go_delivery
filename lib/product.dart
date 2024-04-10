@@ -200,7 +200,7 @@ class _ProductState extends State<Product> {
               },
               child: Container(
                 color: Color.fromRGBO(255, 94, 94, 1),
-                width: MediaQuery.of(context).size.width / 1,
+                width: MediaQuery.of(context).size.width * 0.9,
                 height: 50.0,
                 child:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [

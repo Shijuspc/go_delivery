@@ -245,7 +245,7 @@ class _SignupState extends State<Signup> {
                     onPressed: _createAccount,
                     child: Text(
                       'Sign Up',
-                      style: TextStyle(
+                      style: TextStyle(color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 17,
                       ),

@@ -310,10 +310,10 @@ class _CartState extends State<Cart> {
                 );
               },
               child: Container(
-                color: Color.fromRGBO(255, 94, 94, 1),
-                width: MediaQuery.of(context).size.width / 1,
+                color: const Color.fromRGBO(255, 94, 94, 1),
+                width: MediaQuery.of(context).size.width * 0.9,
                 height: 50.0,
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.shopping_bag_rounded, color: Colors.white),

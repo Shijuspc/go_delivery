@@ -71,7 +71,7 @@ class _StartState extends State<Start> {
                     ),
                     SizedBox(
                       height: 45,
-                      width: 120,
+                      width: 150,
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               elevation: 0,
@@ -87,7 +87,7 @@ class _StartState extends State<Start> {
                           },
                           child: Text(
                             'Get Started',
-                            style: TextStyle(
+                            style: TextStyle(color: Colors.white,
                                 fontWeight: FontWeight.bold, fontSize: 15),
                           )),
                     ),
